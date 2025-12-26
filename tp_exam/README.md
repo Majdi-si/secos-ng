@@ -98,3 +98,4 @@ Ceci vous génère une archive compressée contenant vos modifications, que vous
 pouvez m'envoyer par mail.
 
 
+make clean && make && timeout 30 make qemu

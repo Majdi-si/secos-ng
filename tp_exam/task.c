@@ -14,7 +14,7 @@
  * ============================================ */
 
 static task_t tasks[NB_TASKS];
-static int current_task = 0;
+static int current_task = -1;  // -1 = kernel, 0 = task1, 1 = task2
 
 /* ============================================
  * Accesseurs
@@ -33,79 +33,73 @@ void set_current_task(int task_id) {
 }
 
 /* ============================================
- * Initialisation d'une tâche
- * ============================================ */
-
-static void init_task(int task_id, void (*entry)(), uint32_t pgd, 
-                      uint32_t kernel_stack, uint32_t user_stack) {
-    // Préparer le contexte initial sur la pile noyau
-    uint32_t* kstack = (uint32_t*)(kernel_stack + STACK_SIZE);
-    
-    // Empiler le contexte pour IRET (transition vers ring 3)
-    *(--kstack) = SEL_DATA_R3 | 3;              // SS
-    *(--kstack) = user_stack + STACK_SIZE - 4;  // ESP
-    *(--kstack) = 0x202;                         // EFLAGS (IF=1)
-    *(--kstack) = SEL_CODE_R3 | 3;              // CS
-    *(--kstack) = (uint32_t)entry;              // EIP
-    
-    // Error code et numéro d'interruption (factices)
-    *(--kstack) = 0;  // Error code
-    *(--kstack) = 0;  // Int number
-    
-    // Registres généraux (PUSHA order: EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI)
-    *(--kstack) = 0;  // EAX
-    *(--kstack) = 0;  // ECX
-    *(--kstack) = 0;  // EDX
-    *(--kstack) = 0;  // EBX
-    *(--kstack) = 0;  // ESP (ignoré par POPA)
-    *(--kstack) = 0;  // EBP
-    *(--kstack) = 0;  // ESI
-    *(--kstack) = 0;  // EDI
-    
-    tasks[task_id].esp0 = (uint32_t)kstack;
-    tasks[task_id].cr3 = pgd;
-    tasks[task_id].active = 1;
-}
-
-/* ============================================
  * Initialisation des tâches
  * ============================================ */
 
 void init_tasks(void) {
-    // Initialiser mémoire partagée à 0
-    memset((void*)SHARED_PHYS, 0, 0x1000);
+    // Task 1 : écrit dans la mémoire partagée
+    tasks[0].cr3    = PGD_ADDR;  // Même PGD pour toutes les tâches
+    tasks[0].kstack = KERNEL_STACK_T1;
+    tasks[0].ustack = USER_STACK_T1;
+    tasks[0].entry  = user1;
+    tasks[0].esp    = 0;
+    tasks[0].active = 1;
     
-    // Initialiser les deux tâches
-    init_task(0, user1, PGD_TASK1, KERNEL_STACK_T1, USER_STACK_T1);
-    init_task(1, user2, PGD_TASK2, KERNEL_STACK_T2, USER_STACK_T2);
+    // Task 2 : lit et affiche via syscall
+    tasks[1].cr3    = PGD_ADDR;  // Même PGD pour toutes les tâches
+    tasks[1].kstack = KERNEL_STACK_T2;
+    tasks[1].ustack = USER_STACK_T2;
+    tasks[1].entry  = user2;
+    tasks[1].esp    = 0;
+    tasks[1].active = 1;
     
-    current_task = 0;
-    
-    debug("Taches initialisees\n");
+    debug("2 taches initialisees\n");
+    debug("  Task1: cr3=0x%x kstack=0x%x ustack=0x%x\n", 
+          tasks[0].cr3, tasks[0].kstack, tasks[0].ustack);
+    debug("  Task2: cr3=0x%x kstack=0x%x ustack=0x%x\n", 
+          tasks[1].cr3, tasks[1].kstack, tasks[1].ustack);
 }
 
 /* ============================================
- * Démarrage de la première tâche
+ * Démarrage de l'ordonnanceur
  * ============================================ */
 
-void start_first_task(void) {
-    // Configurer le TSS pour la première tâche
-    tss_t* tss = get_tss();
-    tss->s0.esp = KERNEL_STACK_T1 + STACK_SIZE;
-    tss->s0.ss  = SEL_DATA_R0;
+void start_scheduler(void) {
+    current_task = 0;
     
-    // Charger le PGD de la première tâche
+    // Configurer le TSS pour la pile noyau de la tâche 0
+    tss_t* tss = get_tss();
+    tss->s0.esp = tasks[0].kstack + STACK_SIZE;
+    tss->s0.ss  = gdt_krn_seg_sel(GDT_DATA_R0_IDX);
+    
+    // Charger le PGD de la tâche 0
     set_cr3(tasks[0].cr3);
     
-    debug("Demarrage de la premiere tache...\n");
+    debug("\n=== Demarrage ordonnanceur ===\n");
+    debug("Lancement Task1 (ecriture compteur)\n\n");
     
-    // Activer les interruptions et sauter vers la tâche
-    asm volatile(
-        "mov %0, %%esp          \n"
-        "popa                   \n"
-        "add $8, %%esp          \n"
-        "sti                    \n"
+    // Passer en ring 3 avec la première tâche
+    uint32_t ustack = tasks[0].ustack + STACK_SIZE - 4;
+    uint32_t eflags = (1 << 9);  // IF=1 pour activer les interruptions
+    uint32_t ss3 = gdt_usr_seg_sel(GDT_DATA_R3_IDX);
+    uint32_t cs3 = gdt_usr_seg_sel(GDT_CODE_R3_IDX);
+    
+    debug("IRET: SS=0x%x ESP=0x%x EFLAGS=0x%x CS=0x%x EIP=0x%x\n",
+          ss3, ustack, eflags, cs3, (uint32_t)tasks[0].entry);
+    
+    asm volatile (
+        "push %0      \n"  // SS
+        "push %1      \n"  // ESP
+        "push %2      \n"  // EFLAGS avec IF=1
+        "push %3      \n"  // CS
+        "push %4      \n"  // EIP
         "iret"
-        :: "r"(tasks[0].esp0)
+        ::
+        "r"(ss3),
+        "r"(ustack),
+        "r"(eflags),
+        "r"(cs3),
+        "r"(tasks[0].entry)
+        : "memory"
     );
 }

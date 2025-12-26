@@ -8,6 +8,7 @@ objects += gdt_setup.o
 objects += tss.o
 objects += paging.o
 objects += handlers.o
+objects += task.o
 objects += user.o
 
 # Include local pour les headers du tp_exam

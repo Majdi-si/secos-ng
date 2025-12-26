@@ -4,41 +4,37 @@
 #include "include/user.h"
 
 /* ============================================
- * Tâche 1 : Incrémente le compteur et appelle syscall
+ * Fonction d'appel système
+ * void sys_counter(uint32_t *counter);
+ * ============================================ */
+
+static inline void sys_counter(uint32_t* counter) {
+    asm volatile(
+        "mov %0, %%esi \n"
+        "int $0x80"
+        :: "r"(counter)
+        : "esi"
+    );
+}
+
+/* ============================================
+ * Tâche 1 : Écrit le compteur dans la mémoire partagée
  * ============================================ */
 
 void __attribute__((section(".user"))) user1(void) {
     volatile uint32_t* counter = (volatile uint32_t*)SHARED_VIRT_T1;
     *counter = 0;
     
-    while(*counter < 50) {
+    while(1) {
         (*counter)++;
         
-        // Appel système pour afficher le compteur
-        asm volatile(
-            "mov %0, %%esi \n"
-            "int $0x80"
-            :: "r"(counter)
-            : "esi"
-        );
-        
         // Petite attente
-        for (volatile int i = 0; i < 500000; i++);
+        for (volatile int i = 0; i < 300000; i++);
     }
-    
-    // Fin de la tâche - appel système spécial (eax=1 pour signaler la fin)
-    asm volatile(
-        "mov $1, %%eax \n"
-        "int $0x80"
-        ::: "eax"
-    );
-    
-    // Boucle infinie (ne devrait pas être atteinte)
-    while(1);
 }
 
 /* ============================================
- * Tâche 2 : (non utilisée pour l'instant)
+ * Tâche 2 : Lit et affiche le compteur via syscall
  * ============================================ */
 
 void __attribute__((section(".user"))) user2(void) {
@@ -46,13 +42,9 @@ void __attribute__((section(".user"))) user2(void) {
     
     while(1) {
         // Appel système pour afficher le compteur
-        asm volatile(
-            "mov %0, %%esi \n"
-            "int $0x80"
-            :: "r"(counter)
-            : "esi"
-        );
+        sys_counter((uint32_t*)counter);
+        
         // Petite attente
-        for (volatile int i = 0; i < 500000; i++);
+        for (volatile int i = 0; i < 200000; i++);
     }
 }
