@@ -1,3 +1,11 @@
+/* ============================================
+ * paging.c - Configuration de la pagination
+ * 
+ * - Identity mapping 0-12MB (kernel + user)
+ * - Memoire partagee : meme page physique,
+ *   adresses virtuelles differentes par tache
+ * ============================================ */
+
 #include <debug.h>
 #include <pagemem.h>
 #include <cr.h>

@@ -1,3 +1,12 @@
+/* ============================================
+ * gdt_setup.c - Configuration de la GDT
+ * 
+ * Segments flat (base=0, limit=4GB) :
+ * - Code/Data ring 0 (kernel)
+ * - Code/Data ring 3 (user)
+ * - TSS pour transitions ring 3 -> ring 0
+ * ============================================ */
+
 #include <debug.h>
 #include <segmem.h>
 #include <string.h>

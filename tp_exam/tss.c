@@ -1,3 +1,10 @@
+/* ============================================
+ * tss.c - Task State Segment
+ * 
+ * Configure la pile kernel (ss0, esp0) pour
+ * les transitions ring 3 -> ring 0
+ * ============================================ */
+
 #include <debug.h>
 #include <segmem.h>
 #include <string.h>

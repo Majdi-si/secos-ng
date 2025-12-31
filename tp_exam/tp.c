@@ -1,3 +1,10 @@
+/* ============================================
+ * tp.c - Point d'entree principal
+ * 
+ * Initialise GDT, TSS, pagination, IDT
+ * puis lance l'ordonnanceur
+ * ============================================ */
+
 #include <debug.h>
 #include <intr.h>
 #include <segmem.h>

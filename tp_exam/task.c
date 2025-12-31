@@ -1,3 +1,11 @@
+/* ============================================
+ * task.c - Gestion des taches
+ * 
+ * - Structure task_t (cr3, piles, entry, esp)
+ * - Initialisation des 2 taches
+ * - Ordonnanceur round-robin
+ * ============================================ */
+
 #include <debug.h>
 #include <segmem.h>
 #include <intr.h>

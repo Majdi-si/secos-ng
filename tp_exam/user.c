@@ -1,3 +1,10 @@
+/* ============================================
+ * user.c - Code des taches utilisateur (ring 3)
+ * 
+ * - user1() : incremente compteur en memoire partagee
+ * - user2() : affiche compteur via syscall int 0x80
+ * ============================================ */
+
 #include <types.h>
 #include "include/config.h"
 #include "include/user.h"

@@ -1,3 +1,11 @@
+/* ============================================
+ * handlers.c - Gestionnaires d'interruptions
+ * 
+ * - Syscall (int 0x80) : affichage compteur
+ * - Timer (int 32) : ordonnancement preemptif
+ * - Page Fault (int 14) : debug
+ * ============================================ */
+
 #include <debug.h>
 #include <intr.h>
 #include <segmem.h>
