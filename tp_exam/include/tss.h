@@ -1,4 +1,3 @@
-/* GPLv2 (c) Airbus */
 #ifndef __TSS_H__
 #define __TSS_H__
 

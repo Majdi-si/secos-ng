@@ -1,5 +1,5 @@
 # Documentation - Cartographie Mémoire
-## TP Exam SecOS - OS Multi-tâches Préemptif
+## TP Exam SecOS - SI SALAH Majdi
 
 ---
 
@@ -66,9 +66,9 @@
               │   0xC00000    │              │  0x1000000    │
               │   (12 MB)     │              │   (16 MB)     │
               └───────┬───────┘              └───────┬───────┘
-                      │                               │
-                      │         PGD[3]                │         PGD[4]
-                      ▼                               ▼
+                      │                              │
+                      │    PGD[3]                    │      PGD[4]
+                      ▼                              ▼
               ┌───────────────┐              ┌───────────────┐
               │  PTB_SHR_T1   │              │  PTB_SHR_T2   │
               │  (0x404000)   │              │  (0x405000)   │
@@ -208,9 +208,6 @@ tp_exam/
 ├── tss.c             # Initialisation TSS
 ├── user.c            # Code des tâches ring 3
 ├── Makefile
-└── MEMORY_MAP.md     # Cette documentation
+└── Documentation.md     # Cette documentation
 ```
 
----
-
-*Documentation générée pour le TP Exam SecOS*

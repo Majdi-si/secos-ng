@@ -1,19 +1,10 @@
-/* GPLv2 (c) Airbus */
 #include <debug.h>
 #include <segmem.h>
 #include <string.h>
 #include "include/config.h"
 #include "include/tss.h"
 
-/* ============================================
- * Variables globales
- * ============================================ */
-
 tss_t TSS;
-
-/* ============================================
- * Fonctions
- * ============================================ */
 
 tss_t* get_tss(void) {
     return &TSS;

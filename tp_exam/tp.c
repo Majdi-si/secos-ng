@@ -1,4 +1,3 @@
-/* GPLv2 (c) Airbus */
 #include <debug.h>
 #include <intr.h>
 #include <segmem.h>
@@ -26,23 +25,18 @@ void tp(void) {
     debug("=== TP Exam: OS Multi-taches      ===\n");
     debug("======================================\n\n");
     
-    // 1. Initialiser la GDT
     debug("[1/5] Initialisation GDT...\n");
     init_gdt();
     
-    // 2. Initialiser le TSS
     debug("[2/5] Initialisation TSS...\n");
     init_tss();
     
-    // 3. Initialiser la pagination (kernel + 2 tâches)
     debug("[3/5] Initialisation Pagination...\n");
     init_pagination();
     
-    // 4. Configurer l'IDT (syscall + timer)
     debug("[4/5] Configuration IDT...\n");
     setup_idt();
     
-    // 5. Initialiser les tâches
     debug("[5/5] Initialisation Taches...\n");
     init_tasks();
     
@@ -52,9 +46,7 @@ void tp(void) {
     debug("Preemption via timer IRQ0 (int 32)\n");
     debug("======================================\n");
     
-    // 6. Démarrer l'ordonnanceur (ne retourne jamais)
     start_scheduler();
     
-    // Ne devrait jamais arriver ici
     while(1);
 }

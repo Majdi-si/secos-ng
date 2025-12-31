@@ -1,4 +1,3 @@
-/* GPLv2 (c) Airbus */
 #ifndef __GDT_SETUP_H__
 #define __GDT_SETUP_H__
 

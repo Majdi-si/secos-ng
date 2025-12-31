@@ -1,4 +1,3 @@
-/* GPLv2 (c) Airbus */
 #include <debug.h>
 #include <segmem.h>
 #include <string.h>
@@ -6,15 +5,7 @@
 #include "include/gdt_setup.h"
 #include "include/tss.h"
 
-/* ============================================
- * Variables globales
- * ============================================ */
-
 seg_desc_t GDT[GDT_SIZE];
-
-/* ============================================
- * Macros pour créer les descripteurs
- * ============================================ */
 
 #define gdt_flat_dsc(_dSc_,_pVl_,_tYp_)                                 \
    ({                                                                   \
@@ -40,10 +31,6 @@ seg_desc_t GDT[GDT_SIZE];
       (_dSc_)->p      = 1;                                              \
    })
 
-/* ============================================
- * Fonctions
- * ============================================ */
-
 seg_desc_t* get_gdt(void) {
     return GDT;
 }
@@ -51,22 +38,11 @@ seg_desc_t* get_gdt(void) {
 void init_gdt(void) {
     gdt_reg_t gdtr;
     
-    // Descripteur NULL (index 0)
     GDT[0].raw = 0ULL;
-    
-    // Code ring 0 - flat (index 1)
     gdt_flat_dsc(&GDT[GDT_CODE_R0_IDX], 0, SEG_DESC_CODE_XR);
-    
-    // Data ring 0 - flat (index 2)
     gdt_flat_dsc(&GDT[GDT_DATA_R0_IDX], 0, SEG_DESC_DATA_RW);
-    
-    // Code ring 3 - flat (index 3)
     gdt_flat_dsc(&GDT[GDT_CODE_R3_IDX], 3, SEG_DESC_CODE_XR);
-    
-    // Data ring 3 - flat (index 4)
     gdt_flat_dsc(&GDT[GDT_DATA_R3_IDX], 3, SEG_DESC_DATA_RW);
-    
-    // TSS descriptor (index 5)
     tss_dsc(&GDT[GDT_TSS_IDX], (uint32_t)get_tss());
     
     // Charger la GDT

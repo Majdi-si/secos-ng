@@ -1,4 +1,3 @@
-/* GPLv2 (c) Airbus */
 #ifndef __HANDLERS_H__
 #define __HANDLERS_H__
 

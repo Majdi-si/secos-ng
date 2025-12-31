@@ -1,4 +1,3 @@
-/* GPLv2 (c) Airbus */
 #ifndef __PAGING_H__
 #define __PAGING_H__
 
